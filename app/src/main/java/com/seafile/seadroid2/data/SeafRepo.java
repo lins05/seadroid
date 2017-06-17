@@ -42,7 +42,7 @@ public class SeafRepo implements SeafItem {
         repo.permission = obj.getString("permission");
         repo.mtime = obj.getLong("mtime");
         repo.encrypted = obj.getBoolean("encrypted");
-        repo.root = obj.getString("root");
+        repo.root = obj.optString("root");
         repo.size = obj.getLong("size");
         repo.isGroupRepo = obj.getString("type").equals("grepo");
         repo.isPersonalRepo = obj.getString("type").equals("repo");
