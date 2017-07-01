@@ -1,22 +1,15 @@
-#http://docs.travis-ci.com/user/languages/android/
-language: android
-
-sudo: false
-jdk: oraclejdk8
-android:
-  components:
-      - tools
-      - platform-tools
-      - build-tools-23.0.2
-      - android-23
-      - extra-android-support
-      - extra-android-m2repository
-
+sudo: required
+services:
+- docker
+language: python
+env: ANDROID_BUILDER_IMAGE=lins05/android-sdk:latest
+install:
+- time docker pull $ANDROID_BUILDER_IMAGE
 script:
-    - cp app/key.properties.example app/key.properties
-    - cp app/key.properties.example app/debugkey.properties
-    - keytool -genkey -v -keystore app/debug.keystore -alias AndroidDebugKey -keyalg RSA -keysize 2048 -validity 1 -storepass android -keypass android -dname "cn=TEST, ou=TEST, o=TEST, c=TE"
-    - ./gradlew clean assemble
-
-
-# reference https://docs.travis-ci.com/user/languages/android
+- docker run -it --rm --name seadoid-builder -v $PWD:$PWD -w $PWD $ANDROID_BUILDER_IMAGE
+  ./gradlew clean assembleRelease
+before_install:
+  # travis ci can only encrypt at most one file, so we have to create a tarball for release.keystore and key.properties
+- openssl aes-256-cbc -K $encrypted_fe9440d471e8_key -iv $encrypted_fe9440d471e8_iv
+  -in signkeys.tar.gz.enc -out signkeys.tar.gz -d
+- tar xf signkeys.tar.gz -C app --strip-components=1
